@@ -11,8 +11,8 @@
 const frequencyRegex = /\b\d{2,3}[,.]\d{1,3}\b/g;
 
 function makeFrequenciesClickable() {
-  // Explicitly define the desired base URL
-  const baseUrl = "https://fmscan.org/stream.php"; // The URL to which the frequencies will be added
+
+    const baseUrl = window.location.origin;
   
   // Check if the current page is fmscan.org
   if (window.location.hostname.includes('fmscan.org')) {
