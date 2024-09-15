@@ -2,6 +2,12 @@
 
 This browser extension plugin links frequency databases or Logfiles (e.g. fmdx.pl, fmscan.org, db.wtfda.org and others) with the FMDX web server.
 
+![image](https://github.com/user-attachments/assets/5da01050-dc3d-400f-b807-a0014d3bfd7f)
+![image](https://github.com/user-attachments/assets/8cd7f928-1d45-4d91-ba0f-14f416d743b4)
+![image](https://github.com/user-attachments/assets/c57dee76-c666-4552-addb-8bbce7ffaf4f)
+
+
+
 ## v1.0
 - Extension for Chrome browser (Firefox coming soon!)
 
