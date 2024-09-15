@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////
 ///                                                   ///
-///  FREQUENCY LINK FOR FM-DX-WEBSERVER (V1.0)        ///
+///  FREQUENCY LINK FOR FM-DX-WEBSERVER (V1.0a BETA)  ///
 ///                                                   ///
 ///  by Highpoint        last update: 15.09.24        ///
 ///                                                   ///
@@ -8,79 +8,94 @@
 ///                                                   ///
 /////////////////////////////////////////////////////////
 
-let lastWebSocketUrl = null; // Store the last successful WebSocket address here
-let textSocket = null;
+let lastWebSocketUrl = null;
 let isConnected = false;
-let checkedDomains = {}; // Cache for checked domains
+let checkedDomains = {};
+let socketPromise = null;
+let currentSocket = null; // Halte den aktuellen WebSocket-Status
 
-// Function to connect to the WebSocket server
-function connectWebSocket(host, port) {
+// Funktion zur Erstellung eines WebSocket-Promises
+async function createWebSocketPromise(host, port) {
     const webSocketUrl = `ws://${host}:${port}/text`;
-    console.log('Trying to connect to WebSocket:', webSocketUrl);
+    console.log('Versuche, eine Verbindung zu WebSocket herzustellen:', webSocketUrl);
 
-    textSocket = new WebSocket(webSocketUrl);
-
-    textSocket.onopen = function () {
-        console.log('WebSocket connection established to', webSocketUrl);
-        isConnected = true;
-        lastWebSocketUrl = webSocketUrl; // Store the last successful connection
-        console.log(`Stored WebSocket URL: ${lastWebSocketUrl}`);
-        checkedDomains[host] = true; // Mark the domain as successfully checked
-    };
-
-    textSocket.onclose = function () {
-        console.log('WebSocket connection closed');
-        isConnected = false;
-    };
-
-    textSocket.onerror = function (error) {
-        console.error('WebSocket error:', error);
-        isConnected = false;
-        checkedDomains[host] = false; // Mark the domain as unavailable
-    };
-
-    textSocket.onmessage = function (event) {
-        // You can receive messages from the server here if needed
-    };
-}
-
-// Function to send frequency data over WebSocket
-function sendDataToClient(frequency) {
-    if (isConnected && textSocket && textSocket.readyState === WebSocket.OPEN) {
-        const dataToSend = `T${(frequency * 1000).toFixed(0)}`;
-        textSocket.send(dataToSend);
-        console.log("WebSocket sent:", dataToSend);
-    } else if (lastWebSocketUrl) {
-        console.log(`WebSocket not open. Reconnecting to ${lastWebSocketUrl}`);
-        reconnectToLastWebSocket(frequency);
-    } else {
-        console.error('No WebSocket available to send data.');
+    // Wenn bereits eine Verbindung besteht, nutze diese
+    if (currentSocket && currentSocket.readyState === WebSocket.OPEN) {
+        console.log('Verwende bestehende WebSocket-Verbindung:', webSocketUrl);
+        return currentSocket;
     }
-}
 
-// Function to reconnect to the last WebSocket server
-function reconnectToLastWebSocket(frequency) {
-    if (lastWebSocketUrl) {
-        console.log('Reconnecting to last known WebSocket URL:', lastWebSocketUrl);
-        textSocket = new WebSocket(lastWebSocketUrl);
+    return new Promise((resolve, reject) => {
+        const socket = new WebSocket(webSocketUrl);
 
-        textSocket.onopen = function () {
-            console.log('Reconnected to WebSocket:', lastWebSocketUrl);
+        socket.onopen = function () {
+            console.log('WebSocket-Verbindung erfolgreich:', webSocketUrl);
             isConnected = true;
-            sendDataToClient(frequency); // Send the frequency after reconnecting
+            lastWebSocketUrl = webSocketUrl; // Speichere die letzte erfolgreiche Verbindung
+            console.log(`Gespeicherte WebSocket-URL: ${lastWebSocketUrl}`);
+            checkedDomains[host] = true; // Markiere die Domain als erfolgreich überprüft
+            currentSocket = socket; // Speichere den aktuellen Socket
+            resolve(socket);
         };
 
-        textSocket.onerror = function (error) {
-            console.error('Error reconnecting to WebSocket:', error);
+        socket.onerror = function (error) {
+            console.error('WebSocket-Fehler:', error);
+            isConnected = false;
+            checkedDomains[host] = false;
+            currentSocket = null;
+            reject(error);
         };
+
+        socket.onclose = function () {
+            console.log('WebSocket-Verbindung geschlossen');
+            isConnected = false;
+            currentSocket = null;
+        };
+    });
+}
+
+// Funktion, um die WebSocket-Verbindung aufzubauen
+async function connectWebSocket(host, port) {
+    if (currentSocket && currentSocket.readyState === WebSocket.OPEN) {
+        console.log('Bereits mit WebSocket verbunden:', lastWebSocketUrl);
+        return;
+    }
+    socketPromise = createWebSocketPromise(host, port);
+}
+
+// Daten nur senden, wenn WebSocket verbunden ist
+async function sendDataToClient(frequency) {
+    if (!socketPromise) {
+        console.error('Keine WebSocket-Verbindung verfügbar.');
+        return;
+    }
+
+    try {
+        const socket = await socketPromise; // await wird hier verwendet
+        if (socket.readyState === WebSocket.OPEN) {
+            const dataToSend = `T${(frequency * 1000).toFixed(0)}`;
+            socket.send(dataToSend);
+            console.log("WebSocket sendet:", dataToSend);
+        } else {
+            console.error('WebSocket ist nicht geöffnet. Keine Daten gesendet.');
+        }
+    } catch (error) {
+        console.error('WebSocket-Fehler. Verbindung konnte nicht hergestellt werden:', error);
     }
 }
 
-// Function to check WebSocket availability on a domain
+// Funktion zum erneuten Verbinden mit der letzten WebSocket-Verbindung
+async function reconnectToLastWebSocket(frequency) {
+    if (lastWebSocketUrl && currentSocket && currentSocket.readyState === WebSocket.OPEN) {
+        console.log('Erneutes Verwenden der letzten bekannten WebSocket-URL:', lastWebSocketUrl);
+        await sendDataToClient(frequency); // await hier zur Nutzung der bestehenden Verbindung
+    }
+}
+
+// Funktion zum Überprüfen der WebSocket-Verfügbarkeit für eine Domain
 function checkWebSocketAvailability(host, port, callback) {
-    // Skip if the domain has already been checked
     if (checkedDomains[host] !== undefined) {
-        console.log(`Skipping WebSocket check for previously checked domain: ${host}`);
+        console.log(`WebSocket-Überprüfung für bereits überprüfte Domain übersprungen: ${host}`);
         callback(checkedDomains[host], host, port);
         return;
     }
@@ -89,97 +104,80 @@ function checkWebSocketAvailability(host, port, callback) {
 
     let timeout = setTimeout(() => {
         ws.close();
-        console.log(`WebSocket check timed out for: ${host}:${port}`);
-        checkedDomains[host] = false; // Store that the domain doesn't have WebSocket connection
+        console.log(`WebSocket-Überprüfung abgelaufen für: ${host}:${port}`);
+        checkedDomains[host] = false;
         callback(false, host, port);
-    }, 2000); // 2-second timeout (adjustable)
+    }, 2000);
 
     ws.onopen = function () {
         clearTimeout(timeout);
-        console.log(`WebSocket available at ws://${host}:${port}/text`);
+        console.log(`WebSocket verfügbar unter ws://${host}:${port}/text`);
         ws.close();
-        checkedDomains[host] = true; // Store that the domain has WebSocket connection
+        checkedDomains[host] = true;
         callback(true, host, port);
     };
 
     ws.onerror = function () {
         clearTimeout(timeout);
-        console.log(`WebSocket not available at ws://${host}:${port}/text`);
-        checkedDomains[host] = false; // Store that the domain doesn't have WebSocket connection
+        console.log(`WebSocket nicht verfügbar unter ws://${host}:${port}/text`);
+        checkedDomains[host] = false;
         callback(false, host, port);
     };
 }
 
 // Tabs update listener
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     if (changeInfo.url) {
-        console.log("Visited URL:", changeInfo.url);
+        console.log("Besuchte URL:", changeInfo.url);
 
         const urlObj = new URL(changeInfo.url);
         const host = urlObj.hostname;
 
-        // Check if the URL should be explicitly excluded
         const excludedHosts = ['newtab', 'maps.fmdx.org', 'fmscan.org', 'db.wtfda.org'];
 
-        // If the site is excluded, don't perform WebSocket check, but still extract the frequency
         if (excludedHosts.includes(host)) {
-            console.log(`Skipping WebSocket check for: ${host}`);
+            console.log(`WebSocket-Überprüfung übersprungen für: ${host}`);
             
-            // Extract frequency even for excluded hosts
             const frequency = extractFrequency(changeInfo.url);
             if (frequency) {
-                console.log(`Extracted Frequency from excluded host: ${frequency}`);
-                // Send the frequency to the last known WebSocket
-                sendDataToClient(frequency);
+                console.log(`Extrahierte Frequenz vom ausgeschlossenen Host: ${frequency}`);
+                await sendDataToClient(frequency);
             }
 
             makeFrequenciesClickable();
             return;
         }
 
-        const port = urlObj.port || 8080; // Default to port 8080 if none is specified
+        const port = urlObj.port || 8080;
 
-        console.log(`Checking WebSocket availability for: ${host}:${port}`);
+        console.log(`Überprüfe WebSocket-Verfügbarkeit für: ${host}:${port}`);
 
-        // Check WebSocket availability (only once per domain)
-        checkWebSocketAvailability(host, port, (isAvailable, validHost, validPort) => {
+        checkWebSocketAvailability(host, port, async (isAvailable, validHost, validPort) => {
             if (isAvailable) {
-                console.log(`WebSocket found and connected to ${validHost}:${validPort}/text`);
-                // Connect to the found WebSocket server
-                connectWebSocket(validHost, validPort);
+                console.log(`WebSocket gefunden und verbunden zu ${validHost}:${validPort}/text`);
+                await connectWebSocket(validHost, validPort);
 
-                // Extract and send the frequency (if found in the URL)
                 const frequency = extractFrequency(changeInfo.url);
                 if (frequency) {
-                    sendDataToClient(frequency);
+                    await sendDataToClient(frequency);
                 } else {
-                    console.log("No frequency found in URL.");
+                    console.log("Keine Frequenz in der URL gefunden.");
                 }
             } else {
-                console.error(`WebSocket not available for this host: ${host}`);
-                // Use the last successful WebSocket connection if available
-                if (lastWebSocketUrl) {
-                    console.log(`Using last known WebSocket URL: ${lastWebSocketUrl}`);
-                    const frequency = extractFrequency(changeInfo.url);
-                    if (frequency) {
-                        sendDataToClient(frequency);
-                    } else {
-                        console.log("No frequency found in URL.");
-                    }
-                }
+                console.error(`WebSocket für diesen Host nicht verfügbar: ${host}`);
+                await reconnectToLastWebSocket(extractFrequency(changeInfo.url));
             }
         });
     }
 });
 
-// Function to extract the frequency from the URL and replace %2C or period with a period
+// Funktion zum Extrahieren der Frequenz aus der URL und Ersetzen von %2C oder Komma durch einen Punkt
 function extractFrequency(url) {
-    const decodedUrl = decodeURIComponent(url); // Decode the URL to convert %2C to a comma
-    console.log(`Decoded URL: ${decodedUrl}`); // Debug log for decoded URL
+    const decodedUrl = decodeURIComponent(url);
+    console.log(`Dekodierte URL: ${decodedUrl}`);
 
-    // Regular expressions for frequencies with comma or period
-    const fmscanRegex = /[?&]f=([\d]+[.,][\d]*)/; // Accept both comma and period, e.g., ?f=106,4 or ?f=87.7
-    const freqRegex = /#freq=([\d]+[.,][\d]*)/;   // Accept both comma and period, e.g., #freq=106,4 or #freq=87.7
+    const fmscanRegex = /[?&]f=([\d]+[.,][\d]*)/;
+    const freqRegex = /#freq=([\d]+[.,][\d]*)/;
 
     const fmscanMatch = decodedUrl.match(fmscanRegex);
     const freqMatch = decodedUrl.match(freqRegex);
@@ -187,21 +185,18 @@ function extractFrequency(url) {
     let frequency = null;
 
     if (fmscanMatch) {
-        // Replace comma with period and process the frequency
         frequency = fmscanMatch[1].replace(',', '.');
     } else if (freqMatch) {
-        // Replace comma with period and process the frequency
         frequency = freqMatch[1].replace(',', '.');
     }
 
     if (frequency) {
-        // Check if there is a period, and if not, append ".0"
         if (!frequency.includes('.')) {
             frequency += '.0';
         }
-        frequency = parseFloat(frequency); // Convert to a number for further calculations
+        frequency = parseFloat(frequency);
     }
 
-    console.log(`Extracted Frequency: ${frequency}`); // Debug log for extracted frequency
+    console.log(`Extrahierte Frequenz: ${frequency}`);
     return frequency;
 }
