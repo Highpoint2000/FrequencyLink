@@ -15,7 +15,7 @@ This browser extension plugin links frequency databases or Logfiles (e.g. fmdx.p
 6. A file explorer window will pop up. Navigate to the folder where the extension's files are located
 7. Select the folder that contains the unpacked extension (the folder should include the manifest.json file)
 8. Click "Select Folder" (or "Open"), and the extension will be installed
-9. Now load an FMDX web server, all frequencies (MAPALL, scanner LOGFILE, databases) become clickable and load them into the web server
+9. Restart the browser and load an FMDX web server, all frequencies (MAPALL, scanner LOGFILE, databases) become clickable and load them into the web server
 
 ## Important notes: 
 
