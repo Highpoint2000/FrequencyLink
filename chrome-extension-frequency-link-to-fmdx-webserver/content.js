@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////
 ///                                                   ///
-///  FREQUENCY LINK FOR FM-DX-WEBSERVER (V1.0)        ///
+///  FREQUENCY LINK FOR FM-DX-WEBSERVER (V1.0a BETA)  ///
 ///                                                   ///
 ///  by Highpoint        last update: 15.09.24        ///
 ///                                                   ///
