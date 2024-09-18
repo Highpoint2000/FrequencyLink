@@ -1,6 +1,6 @@
 # Frequency Link for [FM-DX-Webserver](https://github.com/NoobishSVK/fm-dx-webserver) (Browser Extension!)
 
-This browser extension plugin links frequency databases or Logfiles with the FMDX web server.
+This browser extension plugin links frequency databases, websites or log files to the FMDX web server so that the frequencies can be selected directly.
 
 ![image](https://github.com/user-attachments/assets/5da01050-dc3d-400f-b807-a0014d3bfd7f)
 ![image](https://github.com/user-attachments/assets/8cd7f928-1d45-4d91-ba0f-14f416d743b4)
