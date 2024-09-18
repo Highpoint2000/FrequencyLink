@@ -1,15 +1,17 @@
 /////////////////////////////////////////////////////////
 ///                                                   ///
-///  FREQUENCY LINK FOR FM-DX-WEBSERVER (V1.0a BETA)  ///
-///                                                   ///
-///  by Highpoint        last update: 15.09.24        ///
-///                                                   ///
-///  https://github.com/Highpoint2000/FrequencyLink   ///
-///                                                   ///
+//            FREQUENCY LINK FOR FM-DX WEBSERVER      ///
+//                       (V1.1)                       ///
+//                                                    ///
+//                     by Highpoint                   ///
+//               last update: 18.09.24                ///
+//                                                    ///
+//  https://github.com/Highpoint2000/FrequencyLink    ///
+//                                                    ///
 /////////////////////////////////////////////////////////
 
 let lastWebSocketUrl = null; // Store the last successful WebSocket URL here
-let checkedDomains = {}; // Cache for checked domains
+let checkedDomains = {}; // Cache for checked domains with ports
 
 // Function to create a WebSocket promise and close immediately after connecting
 async function createWebSocketPromise(host, port) {
@@ -23,14 +25,14 @@ async function createWebSocketPromise(host, port) {
             console.log('WebSocket connection successful:', webSocketUrl);
             lastWebSocketUrl = webSocketUrl; // Store the last successful connection
             console.log(`Stored WebSocket URL: ${lastWebSocketUrl}`);
-            checkedDomains[host] = true; // Mark the domain as successfully checked
+            checkedDomains[`${host}:${port}`] = true; // Mark the host and port as successfully checked
             socket.close(); // Close the connection immediately
             resolve(webSocketUrl); // Return the WebSocket URL
         };
 
         socket.onerror = function (error) {
             console.error('WebSocket error:', error);
-            checkedDomains[host] = false;
+            checkedDomains[`${host}:${port}`] = false; // Mark the host and port as failed
             reject(error);
         };
 
@@ -38,15 +40,6 @@ async function createWebSocketPromise(host, port) {
             console.log('WebSocket connection closed');
         };
     });
-}
-
-// Function to check WebSocket availability and immediately close the connection
-async function connectWebSocket(host, port) {
-    if (lastWebSocketUrl) {
-        console.log('WebSocket URL already known:', lastWebSocketUrl);
-        return;
-    }
-    await createWebSocketPromise(host, port);
 }
 
 // Function to send frequency data over a temporary WebSocket connection
@@ -61,7 +54,7 @@ async function sendDataToClient(frequency) {
         const socket = new WebSocket(lastWebSocketUrl);
 
         socket.onopen = function () {
-            const dataToSend = `T${(frequency * 1000).toFixed(0)}`;
+            const dataToSend = `T${(frequency * 1000).toFixed(0)}`; // Send frequency multiplied by 1000
             socket.send(dataToSend);
             console.log("WebSocket sending:", dataToSend);
             socket.close(); // Close the connection after sending the data
@@ -79,11 +72,13 @@ async function sendDataToClient(frequency) {
     });
 }
 
-// Function to check WebSocket availability for a domain
+// Function to check WebSocket availability for a domain and port
 function checkWebSocketAvailability(host, port, callback) {
-    if (checkedDomains[host] !== undefined) {
-        console.log(`WebSocket check skipped for already verified domain: ${host}`);
-        callback(checkedDomains[host], host, port);
+    const domainKey = `${host}:${port}`; // Combine host and port as the key for checking
+
+    if (checkedDomains[domainKey] !== undefined) {
+        console.log(`WebSocket check skipped for already verified domain and port: ${domainKey}`);
+        callback(checkedDomains[domainKey], host, port);
         return;
     }
 
@@ -92,7 +87,7 @@ function checkWebSocketAvailability(host, port, callback) {
     let timeout = setTimeout(() => {
         ws.close();
         console.log(`WebSocket check timed out for: ${host}:${port}`);
-        checkedDomains[host] = false;
+        checkedDomains[domainKey] = false;
         callback(false, host, port);
     }, 2000);
 
@@ -100,14 +95,14 @@ function checkWebSocketAvailability(host, port, callback) {
         clearTimeout(timeout);
         console.log(`WebSocket available at ws://${host}:${port}/text`);
         ws.close();
-        checkedDomains[host] = true;
+        checkedDomains[domainKey] = true;
         callback(true, host, port);
     };
 
     ws.onerror = function () {
         clearTimeout(timeout);
         console.log(`WebSocket not available at ws://${host}:${port}/text`);
-        checkedDomains[host] = false;
+        checkedDomains[domainKey] = false;
         callback(false, host, port);
     };
 }
@@ -120,27 +115,20 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         const urlObj = new URL(changeInfo.url);
         const host = urlObj.hostname;
 
-        const excludedHosts = ['newtab', 'maps.fmdx.org', 'fmscan.org', 'db.wtfda.org'];
-
-        if (excludedHosts.includes(host)) {
-            console.log(`WebSocket check skipped for: ${host}`);
-            
-            const frequency = extractFrequency(changeInfo.url);
-            if (frequency) {
-                console.log(`Extracted frequency from excluded host: ${frequency}`);
-                await sendDataToClient(frequency);
-            }
-
+        const frequency = extractFrequency(changeInfo.url);
+        if (frequency) {
+            console.log(`Extracted frequency from excluded host: ${frequency}`);
+            await sendDataToClient(frequency);
         }
 
-        const port = urlObj.port || 8080;
+        const port = urlObj.port || 8080; // Default to port 8080 if none is specified
 
         console.log(`Checking WebSocket availability for: ${host}:${port}`);
 
         checkWebSocketAvailability(host, port, async (isAvailable, validHost, validPort) => {
             if (isAvailable) {
                 console.log(`WebSocket found and connected to ${validHost}:${validPort}/text`);
-                await connectWebSocket(validHost, validPort);
+                lastWebSocketUrl = `ws://${validHost}:${validPort}/text`; // Always update to the latest
 
                 const frequency = extractFrequency(changeInfo.url);
                 if (frequency) {
@@ -149,7 +137,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
                     console.log("No frequency found in the URL.");
                 }
             } else {
-                console.error(`WebSocket not available for this host: ${host}`);
+                console.error(`WebSocket not available for this host and port: ${host}:${port}`);
             }
         });
     }
@@ -161,32 +149,31 @@ function extractFrequency(url) {
     console.log(`Decoded URL: ${decodedUrl}`);
 
     // Updated regex to handle both ?f= and #freq= patterns
-    const fmscanRegex = /[?&]f=([\d]+[.,]*[\d]*)/;
+    const fmscanRegex = /[?&]f=([\d]+[.,]?[\d]*)|f=([\d]+[.,]?[\d]*)/;
     const freqRegex = /#freq=([\d]+[.,]*[\d]*)/;
 
     const fmscanMatch = decodedUrl.match(fmscanRegex);
     const freqMatch = decodedUrl.match(freqRegex);
+    console.log(`fmscanMatch: ${fmscanMatch}`);
 
-    let frequency = null;
+    let frequency; // Initialize frequency
 
     if (fmscanMatch) {
-        frequency = fmscanMatch[1].replace(',', '.');
+        frequency = fmscanMatch[1] || fmscanMatch[2]; // Capture from either group
     } else if (freqMatch) {
-        frequency = freqMatch[1].replace(',', '.');
+        frequency = freqMatch[1];
     }
 
-    // Check if frequency exists and if it doesn't contain a decimal point
-    if (frequency && !frequency.includes('.')) {
-        frequency += '.0'; // Append .0 if no decimal point exists
-    }
-
-    // Parse the frequency into a float for further calculations
+    // Replace comma with dot and ensure it has a decimal point
     if (frequency) {
+        frequency = frequency.replace(',', '.');
+        if (!frequency.includes('.')) {
+            frequency += '.0'; // Append .0 if no decimal point exists
+        }
+        // Parse the frequency into a float for further calculations
         frequency = parseFloat(frequency);
     }
 
     console.log(`Extracted frequency: ${frequency}`);
     return frequency;
 }
-
-
