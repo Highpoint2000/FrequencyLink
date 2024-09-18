@@ -7,8 +7,10 @@ This browser extension plugin links frequency databases or Logfiles with the FMD
 ![image](https://github.com/user-attachments/assets/c57dee76-c666-4552-addb-8bbce7ffaf4f)
 
 
-## v1.0a BETA (Cromium Browser compatible - Firefox coming soon!)
+## v1.1 (Cromium Browser compatible - Firefox coming soon!)
 - revision of websocket communication
+- the last opened web server is linked
+- only explicit websites are parsed (see list!)
 
 ## Installation notes:
 
