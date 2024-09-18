@@ -1,6 +1,6 @@
 # Frequency Link for [FM-DX-Webserver](https://github.com/NoobishSVK/fm-dx-webserver) (Browser Extension!)
 
-This browser extension plugin links frequency databases or Logfiles (e.g. fmdx.pl, fmscan.org, db.wtfda.org and others) with the FMDX web server.
+This browser extension plugin links frequency databases or Logfiles with the FMDX web server.
 
 ![image](https://github.com/user-attachments/assets/5da01050-dc3d-400f-b807-a0014d3bfd7f)
 ![image](https://github.com/user-attachments/assets/8cd7f928-1d45-4d91-ba0f-14f416d743b4)
@@ -24,7 +24,13 @@ This browser extension plugin links frequency databases or Logfiles (e.g. fmdx.p
 
 ## Important notes: 
 
-- Occasionally a pop window appears, which closes automatically. Unfortunately, this cannot be disabled and is required to read and transmit the frequency.
+Checked sites are:
+https://maps.fmdx.org/
+https://db.wtfda.org/
+https://eservices.traficom.fi/Licensesservices/Forms/BCLicenses.aspx
+https://fmscan.org/
+
+Additional pages are welcome to be included. Occasionally a pop window appears, which closes automatically. Unfortunately, this cannot be disabled and is required to read and transmit the frequency.
 
 ## History
 
