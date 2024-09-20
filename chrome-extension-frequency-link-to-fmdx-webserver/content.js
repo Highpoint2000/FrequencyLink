@@ -1,17 +1,17 @@
 /////////////////////////////////////////////////////////
 ///                                                   ///
 //            FREQUENCY LINK FOR FM-DX WEBSERVER      ///
-//                       (V1.1a)                      ///
+//                       (V1.1b)                      ///
 //                                                    ///
 //                     by Highpoint                   ///
-//               last update: 20.09.24                ///
+//               last update: 21.09.24                ///
 //                                                    ///
 //  https://github.com/Highpoint2000/FrequencyLink    ///
 //                                                    ///
 /////////////////////////////////////////////////////////
 
 // List of allowed hostnames
-const allowedHostnames = ['highpoint2000.selfhost.de', 'db.wtfda.org', 'eservices.traficom.fi', 'maps.fmdx.org']; // Add your allowed hostnames here
+const allowedHostnames = ['db.wtfda.org', 'eservices.traficom.fi', 'maps.fmdx.org']; // Add your allowed hostnames here
 
 /////////////////////////////////////////////////////////
 
@@ -23,9 +23,10 @@ function makeFrequenciesClickable() {
     // Check if the current hostname is in the list of allowed hostnames
     const currentHostname = window.location.hostname;
     const logsScannerPattern = /logs\/SCANNER/; // Pattern to match
+	const logsFMListPattern = /fm_logmap.php/; //
 
     // Check if the current hostname is allowed or matches the pattern
-    if (!allowedHostnames.includes(currentHostname) && !logsScannerPattern.test(window.location.href)) {
+    if (!allowedHostnames.includes(currentHostname) && !logsScannerPattern.test(window.location.href) && !logsFMListPattern.test(window.location.href)) {
         // console.log('The current hostname is not allowed.');
         return; // Exit the function if the hostname is not allowed
     }
