@@ -29,6 +29,7 @@ https://maps.fmdx.org/
 https://db.wtfda.org/
 https://eservices.traficom.fi/Licensesservices/Forms/BCLicenses.aspx
 https://fmscan.org/
+https://fmlist.org/fm_logmap.php
 
 Additional pages are welcome to be included. Occasionally a pop window appears, which closes automatically. Unfortunately, this cannot be disabled and is required to read and transmit the frequency.
 
