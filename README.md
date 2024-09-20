@@ -7,10 +7,9 @@ This browser extension plugin links frequency databases, websites or log files t
 ![image](https://github.com/user-attachments/assets/c57dee76-c666-4552-addb-8bbce7ffaf4f)
 
 
-## v1.1 (Cromium Browser compatible - Firefox coming soon!)
-- revision of websocket communication
-- the last opened web server is linked
-- only explicit websites are parsed (see list!)
+## v1.1a (Cromium Browser compatible - Firefox coming soon!)
+- Bugfixing
+- Built-in switch for console logging
 
 ## Installation notes:
 
@@ -35,6 +34,11 @@ https://fmscan.org/
 Additional pages are welcome to be included. Occasionally a pop window appears, which closes automatically. Unfortunately, this cannot be disabled and is required to read and transmit the frequency.
 
 ## History
+
+## v1.1 (Cromium Browser compatible - Firefox coming soon!)
+- revision of websocket communication
+- the last opened web server is linked
+- only explicit websites are parsed (see list!)
 
 ### v1.0
 - Extension for Chrome browser (Firefox coming soon!)
