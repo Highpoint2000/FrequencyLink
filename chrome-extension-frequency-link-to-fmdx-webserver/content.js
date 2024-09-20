@@ -1,17 +1,17 @@
 /////////////////////////////////////////////////////////
 ///                                                   ///
 //            FREQUENCY LINK FOR FM-DX WEBSERVER      ///
-//                       (V1.1)                       ///
+//                       (V1.1a)                      ///
 //                                                    ///
 //                     by Highpoint                   ///
-//               last update: 18.09.24                ///
+//               last update: 20.09.24                ///
 //                                                    ///
 //  https://github.com/Highpoint2000/FrequencyLink    ///
 //                                                    ///
 /////////////////////////////////////////////////////////
 
 // List of allowed hostnames
-const allowedHostnames = ['highpoint2000.selfhost.de', 'db.wtfda.org', 'eservices.traficom.fi']; // Add your allowed hostnames here
+const allowedHostnames = ['highpoint2000.selfhost.de', 'db.wtfda.org', 'eservices.traficom.fi', 'maps.fmdx.org']; // Add your allowed hostnames here
 
 /////////////////////////////////////////////////////////
 
@@ -26,7 +26,7 @@ function makeFrequenciesClickable() {
 
     // Check if the current hostname is allowed or matches the pattern
     if (!allowedHostnames.includes(currentHostname) && !logsScannerPattern.test(window.location.href)) {
-        console.log('The current hostname is not allowed.');
+        // console.log('The current hostname is not allowed.');
         return; // Exit the function if the hostname is not allowed
     }
 
@@ -48,14 +48,15 @@ function makeFrequenciesClickable() {
                 const frequencyString = matchText.replace(',', '.');
                 const frequency = parseFloat(frequencyString);
 
-                console.log('Found frequency:', frequencyString);
+                // console.log('Found frequency:', frequencyString);
 
                 if (frequency >= 65.5 && frequency <= 108.0) {
                     updatedText += text.slice(lastIndex, startIndex);
                     const linkUrl = `${baseUrl}/f=${encodeURIComponent(frequencyString)}`;
-                    console.log('Generated URL:', linkUrl);
+                    // console.log('Generated URL:', linkUrl);
 
-                    const link = `<a href="javascript:void(0);" onclick="let w = window.open('${linkUrl}', '_blank', 'width=1,height=1,left=-9999,top=-9999,toolbar=no,scrollbars=no,menubar=no'); console.log('Opened URL: ${linkUrl}'); setTimeout(() => { w.close(); }, 1000);" style="text-decoration: underline; cursor: pointer;">${matchText}</a>`;
+                    const link = `<a href="javascript:void(0);" onclick="let w = window.open('${linkUrl}', '_blank', 'width=1,height=1,toolbar=no,scrollbars=no,menubar=no'); setTimeout(() => { if (w) { w.close(); } }, 500);" style="text-decoration: underline; cursor: pointer;">${matchText}</a>`;
+
 
                     updatedText += link;
                 } else {
@@ -75,7 +76,7 @@ function makeFrequenciesClickable() {
 // Function to delay execution by 500 milliseconds after page load
 window.addEventListener('load', () => {
     setTimeout(() => {
-        console.log('Starting frequency marking...');
+        // console.log('Starting frequency marking...');
         makeFrequenciesClickable();
     }, 500); 
 });
