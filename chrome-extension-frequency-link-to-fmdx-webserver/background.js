@@ -25,8 +25,9 @@ let lastWebSocketUrl = null; // Store the last successful WebSocket URL here
 let checkedDomains = {}; // Cache for checked domains with ports
 
 // Function to create a WebSocket promise and close immediately after connecting
-async function createWebSocketPromise(host, port) {
-    const webSocketUrl = `ws://${host}:${port}/text`;
+async function createWebSocketPromise(host, port, isSecure) {
+    const protocol = isSecure ? 'wss' : 'ws'; // Determine the protocol based on isSecure
+    const webSocketUrl = `${protocol}://${host}:${port}/text`;
     logMessage('Attempting to connect to WebSocket:', webSocketUrl);
 
     return new Promise((resolve, reject) => {
@@ -84,7 +85,7 @@ async function sendDataToClient(frequency) {
 }
 
 // Function to check WebSocket availability for a domain and port
-function checkWebSocketAvailability(host, port, callback) {
+function checkWebSocketAvailability(host, port, isSecure, callback) {
     const domainKey = `${host}:${port}`; // Combine host and port as the key for checking
 
     // Check if the domain and port have already been checked
@@ -94,7 +95,8 @@ function checkWebSocketAvailability(host, port, callback) {
         return;
     }
 
-    const ws = new WebSocket(`ws://${host}:${port}/text`);
+    const protocol = isSecure ? 'wss' : 'ws'; // Determine the protocol based on isSecure
+    const wss = new WebSocket(`${protocol}://${host}:${port}/text`);
 
     let timeout = setTimeout(() => {
         wss.close();
@@ -105,7 +107,7 @@ function checkWebSocketAvailability(host, port, callback) {
 
     wss.onopen = function () {
         clearTimeout(timeout);
-        logMessage(`WebSocket available at ws://${host}:${port}/text`);
+        logMessage(`WebSocket available at ${protocol}://${host}:${port}/text`);
         wss.close();
         checkedDomains[domainKey] = true; // Mark as available
         callback(true, host, port);
@@ -113,7 +115,7 @@ function checkWebSocketAvailability(host, port, callback) {
 
     wss.onerror = function () {
         clearTimeout(timeout);
-        logMessage(`WebSocket not available at ws://${host}:${port}/text`);
+        logMessage(`WebSocket not available at ${protocol}://${host}:${port}/text`);
         checkedDomains[domainKey] = false; // Mark as not available
         callback(false, host, port);
     };
@@ -133,15 +135,16 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
             await sendDataToClient(frequency);
         }
 
-        const port = urlObj.port || 443; // Default to port 443 if none is specified
+        const port = urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80); // Default to port 443 for HTTPS, 80 for HTTP
+        const isSecure = urlObj.protocol === 'https:'; // Check if the protocol is HTTPS
 
         logMessage(`Checking WebSocket availability for: ${host}:${port}`);
 
         // Skip WebSocket check if the domain and port are already verified
-        checkWebSocketAvailability(host, port, async (isAvailable, validHost, validPort) => {
+        checkWebSocketAvailability(host, port, isSecure, async (isAvailable, validHost, validPort) => {
             if (isAvailable) {
                 logMessage(`WebSocket found and connected to ${validHost}:${validPort}/text`);
-                lastWebSocketUrl = `ws://${validHost}:${validPort}/text`; // Always update to the latest
+                lastWebSocketUrl = `${isSecure ? 'wss' : 'ws'}://${validHost}:${validPort}/text`; // Always update to the latest
 
                 const frequency = extractFrequency(changeInfo.url);
                 if (frequency) {
