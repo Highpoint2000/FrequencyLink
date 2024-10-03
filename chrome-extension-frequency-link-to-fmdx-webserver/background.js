@@ -97,21 +97,21 @@ function checkWebSocketAvailability(host, port, callback) {
     const ws = new WebSocket(`ws://${host}:${port}/text`);
 
     let timeout = setTimeout(() => {
-        ws.close();
+        wss.close();
         logMessage(`WebSocket check timed out for: ${host}:${port}`);
         checkedDomains[domainKey] = false; // Mark as not available
         callback(false, host, port);
     }, 2000);
 
-    ws.onopen = function () {
+    wss.onopen = function () {
         clearTimeout(timeout);
         logMessage(`WebSocket available at ws://${host}:${port}/text`);
-        ws.close();
+        wss.close();
         checkedDomains[domainKey] = true; // Mark as available
         callback(true, host, port);
     };
 
-    ws.onerror = function () {
+    wss.onerror = function () {
         clearTimeout(timeout);
         logMessage(`WebSocket not available at ws://${host}:${port}/text`);
         checkedDomains[domainKey] = false; // Mark as not available
@@ -133,7 +133,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
             await sendDataToClient(frequency);
         }
 
-        const port = urlObj.port || 8080; // Default to port 8080 if none is specified
+        const port = urlObj.port || 443; // Default to port 443 if none is specified
 
         logMessage(`Checking WebSocket availability for: ${host}:${port}`);
 
