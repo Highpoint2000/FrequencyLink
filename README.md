@@ -10,6 +10,7 @@ This browser extension plugin links frequency databases, websites or log files t
 
 ## v1.1c (Cromium Browser compatible - Firefox coming soon!)
 - Websites and patterns can be defined in the header of the content.js script itself
+- Ready for wss secure connection 
 
 ## Installation notes:
 
