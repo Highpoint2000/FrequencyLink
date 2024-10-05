@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////
 ///                                                   ///
 //            FREQUENCY LINK FOR FM-DX WEBSERVER      ///
-//                       (V1.1c)                      ///
+//                       (V1.1d)                      ///
 //                                                    ///
 //                     by Highpoint                   ///
-//               last update: 03.10.24                ///
+//               last update: 05.10.24                ///
 //                                                    ///
 //  https://github.com/Highpoint2000/FrequencyLink    ///
 //                                                    ///
