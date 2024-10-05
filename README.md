@@ -37,7 +37,7 @@ Sites with previous login:
 - https://fmlist.org/fm_logmap.php (FMLIST Logmap)
 - https://www.fmlist.org/fi_bandscan.php (FMLIST Bandscan)
 - https://www.fmlist.org/fi_log.php (FMLIST Loogbook)
-- https://www.fmlist.org/ul_ukwliste.php? (FMLIST Table - Search or limit the selection via fmlist.org and then open this website!)
+- https://www.fmlist.org/ul_ukwliste.php (FMLIST Table - Search or limit the selection via fmlist.org and then open this website!)
 
 Additional pages are welcome to be included. You can also define websites and patterns yourself in the header of the content.js script. Occasionally a pop window appears, which closes automatically. Unfortunately, this cannot be disabled and is required to read and transmit the frequency.
 
