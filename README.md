@@ -35,7 +35,7 @@ Checked sites are:
 Sites with previous login:
 - https://fmscan.org/sfm.php? (Click on OSMap, GoogleMap, PNG map or List and choose a frequency to switch!)
 - https://fmlist.org/fm_logmap.php (FMLIST Logmap)
-- https://fmlist.org/fi_bandscan.php (FMLIST Bandscan)
+- https://www.fmlist.org/fi_bandscan.php (FMLIST Bandscan)
 - https://fmlist.org/fi_log.php (FMLIST Loogbook)
 - https://fmlist.org/ul_ukwliste.php? (FMLIST Table - Search or limit the selection via fmlist.org and then open this website!)
 
