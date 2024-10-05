@@ -8,9 +8,8 @@ This browser extension plugin links frequency databases, websites or log files t
 ![image](https://github.com/user-attachments/assets/6e8d8c2f-d104-4f71-a576-1f93c085c498)
 
 
-## v1.1c (Cromium Browser compatible - Firefox coming soon!)
-- Websites and patterns can be defined in the header of the content.js script itself
-- Ready for wss secure connection 
+## v1.1d (Cromium Browser compatible - Firefox coming soon!)
+- ready for FMLIST 
 
 ## Installation notes:
 
@@ -42,6 +41,10 @@ Sites with previous login:
 Additional pages are welcome to be included. You can also define websites and patterns yourself in the header of the content.js script. Occasionally a pop window appears, which closes automatically. Unfortunately, this cannot be disabled and is required to read and transmit the frequency.
 
 ## History
+
+### v1.1c (Cromium Browser compatible - Firefox coming soon!)
+- Websites and patterns can be defined in the header of the content.js script itself
+- Ready for wss secure connection 
 
 ### v1.1b (Cromium Browser compatible - Firefox coming soon!)
 - Compatible with FMLIST visual logbook
