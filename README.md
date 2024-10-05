@@ -30,9 +30,14 @@ Checked sites are:
 - https://maps.fmdx.org/
 - https://db.wtfda.org/
 - https://eservices.traficom.fi/Licensesservices/Forms/BCLicenses.aspx
-- https://fmscan.org/
-- https://fmlist.org/fm_logmap.php
 - https://palvelut.mediamonitori.fi/
+  
+Sites with previous login:
+- https://fmscan.org/sfm.php? (Click on OSMap, GoogleMap, PNG map or List and choose a frequency to switch!)
+- https://fmlist.org/fm_logmap.php (FMLIST Logmap)
+- https://fmlist.org/fi_bandscan.php (FMLIST Bandscan)
+- https://fmlist.org/fi_log.php (FMLIST Loogbook)
+- https://fmlist.org/ul_ukwliste.php? (FMLIST Table - Search or limit the selection via fmlist.org and then open this website!)
 
 Additional pages are welcome to be included. You can also define websites and patterns yourself in the header of the content.js script. Occasionally a pop window appears, which closes automatically. Unfortunately, this cannot be disabled and is required to read and transmit the frequency.
 
