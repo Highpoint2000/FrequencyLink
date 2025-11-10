@@ -40,6 +40,12 @@ Sites with previous login:
 
 Additional pages are welcome to be included. You can also define websites and patterns yourself in the header of the content.js script. Occasionally a pop window appears, which closes automatically. Unfortunately, this cannot be disabled and is required to read and transmit the frequency.
 
+## Contact
+
+If you have any questions, would like to report problems, or have suggestions for improvement, please feel free to contact me! You can reach me by email at highpoint2000@googlemail.com. I look forward to hearing from you!
+
+<a href="https://www.buymeacoffee.com/Highpoint" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
 ## History
 
 ### v1.1c (Cromium Browser compatible - Firefox coming soon!)
